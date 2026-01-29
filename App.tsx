@@ -5,11 +5,10 @@ import Footer from './components/Footer';
 import Login from './components/Login';
 import AdminDashboard from './components/AdminDashboard';
 import ArticleModal from './components/ArticleModal';
-import { Article } from './types';
+import { Article, Category } from './types'; // Added Category import
 import { db } from './services/firebase'; 
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
-// Default settings to fix the build error
 const defaultSettings = {
   title: "ALS PeriodECHO",
   subtitle: "Official Newsletter",
@@ -29,8 +28,10 @@ function App() {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [articles, setArticles] = useState<Article[]>([]); 
+  
+  // 1. NEW STATE: Track the selected category from the header
+  const [activeCategory, setActiveCategory] = useState<Category | 'HEADLINE'>('HEADLINE');
 
-  // FETCH STORIES FROM FIREBASE
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -47,9 +48,14 @@ function App() {
         console.error("Error fetching articles:", error);
       }
     };
-
     fetchArticles();
   }, []); 
+
+  // 2. FILTER LOGIC: Filter the articles based on the activeCategory
+  const filteredArticles = articles.filter(article => {
+    if (activeCategory === 'HEADLINE') return true;
+    return article.category === activeCategory;
+  });
 
   if (isAdminLoggedIn) {
     return <AdminDashboard onLogout={() => setIsAdminLoggedIn(false)} />;
@@ -57,38 +63,53 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
-      {/* FIXED: Added settings prop */}
+      {/* 3. UPDATED HEADER: Pass onCategorySelect and auth state */}
       <Header 
-        onAdminClick={() => setIsAdminOpen(true)} 
-        settings={defaultSettings} 
+        settings={defaultSettings}
+        auth={{ isAdmin: true, isLoggedIn: isAdminLoggedIn }}
+        onAdminClick={() => setIsAdminOpen(true)}
+        onLoginClick={() => setIsAdminOpen(true)}
+        onLogoutClick={() => setIsAdminLoggedIn(false)}
+        isAdminActive={false}
+        onCategorySelect={(cat) => setActiveCategory(cat)} 
       />
       
       <main>
-        {/* FIXED: Added settings and featuredArticle props */}
-        <Hero 
-          settings={defaultSettings} 
-          featuredArticle={articles[0]} 
-        />
+        {/* Only show Hero on the main Headline view */}
+        {activeCategory === 'HEADLINE' && (
+          <Hero 
+            settings={defaultSettings} 
+            featuredArticle={articles[0]} 
+          />
+        )}
         
         {/* LATEST NEWS SECTION */}
-        <section id="news" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
+        <section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
           <div className="border-b-4 border-slate-900 pb-4 mb-12">
-            <h2 className="text-4xl md:text-5xl font-black font-serif text-slate-900">
-              Community Voice
+            <h2 className="text-4xl md:text-5xl font-black font-serif text-slate-900 uppercase">
+              {activeCategory === 'HEADLINE' ? 'Community Voice' : activeCategory}
             </h2>
             <p className="text-slate-500 font-bold tracking-widest uppercase text-sm mt-2">
-              Latest Journalism from the Field
+              {activeCategory === 'HEADLINE' 
+                ? 'Latest Journalism from the Field' 
+                : `Browsing all stories in ${activeCategory}`}
             </p>
           </div>
 
-          {articles.length === 0 ? (
+          {filteredArticles.length === 0 ? (
             <div className="text-center py-20 bg-slate-50 rounded-3xl border border-slate-100">
-              <p className="text-slate-400 font-bold text-lg">No stories published yet.</p>
-              <p className="text-slate-300 text-sm mt-2">Login to Admin to create the first post.</p>
+              <p className="text-slate-400 font-bold text-lg">No stories found in this category.</p>
+              <button 
+                onClick={() => setActiveCategory('HEADLINE')}
+                className="text-blue-600 font-bold mt-4 hover:underline"
+              >
+                Back to All News
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-              {articles.map((article) => (
+              {/* 4. USE FILTERED ARTICLES HERE */}
+              {filteredArticles.map((article) => (
                 <article 
                   key={article.id} 
                   className="group cursor-pointer flex flex-col h-full"
@@ -125,7 +146,6 @@ function App() {
         </section>
       </main>
 
-      {/* FIXED: Added settings prop */}
       <Footer settings={defaultSettings} />
 
       {/* MODALS */}
@@ -134,6 +154,7 @@ function App() {
           onClose={() => setIsAdminOpen(false)}
           onLogin={(isAdmin) => {
             if (isAdmin) setIsAdminLoggedIn(true);
+            setIsAdminOpen(false);
           }}
         />
       )}
