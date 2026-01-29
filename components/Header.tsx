@@ -12,26 +12,33 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ settings, auth, onAdminClick, onLoginClick, onLogoutClick, isAdminActive }) => {
   return (
-    <div className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+    // STEP 1: Removed sticky/fixed height constraints from the main wrapper
+    <div className="bg-white border-b border-slate-200 shadow-sm relative z-40">
       <nav className="container mx-auto px-4">
-        {/* Container with generous padding, letting content dictate height */}
-        <div className="flex flex-wrap justify-between items-center py-6">
+        
+        {/* STEP 2: Force the container to be tall enough using padding */}
+        <div className="flex flex-wrap justify-between items-center py-4">
           
-          {/* LOGO SECTION */}
           <div 
-            className="flex items-center flex-shrink-0 cursor-pointer transition-transform hover:scale-[1.01] mr-6" 
+            className="flex items-center flex-shrink-0 cursor-pointer mr-6" 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
             {settings.bannerUrl ? (
-              // THIS IS THE FIX FOR THE SPECIFIC IMAGE
-              // We use arbitrary large values to force the size up.
+              // THE NUCLEAR OPTION: Inline styles force the height.
+              // We set explicit pixel heights that the browser cannot ignore.
               <img 
                 src={settings.bannerUrl} 
                 alt={settings.title} 
-                className="h-[120px] md:h-[200px] w-auto object-contain object-left" 
+                style={{ 
+                  height: '100px',       // Minimum height (Mobile)
+                  minHeight: '100px',    // Force minimum
+                  maxHeight: '180px',    // Maximum height (Desktop)
+                  width: 'auto',         // Keep aspect ratio
+                  objectFit: 'contain'   
+                }}
+                className="md:h-[180px]" // Tailwind backup for larger screens
               />
             ) : (
-              // Fallback if image fails to load
               <div className="flex items-center space-x-3">
                  <span className="font-serif font-black text-3xl text-slate-900">
                    {settings.title}
@@ -40,7 +47,6 @@ const Header: React.FC<HeaderProps> = ({ settings, auth, onAdminClick, onLoginCl
             )}
           </div>
 
-          {/* BUTTONS SECTION */}
           <div className="flex items-center space-x-3 md:space-x-4 mt-4 md:mt-0">
             {auth.isAdmin && (
               <button 
@@ -70,7 +76,6 @@ const Header: React.FC<HeaderProps> = ({ settings, auth, onAdminClick, onLoginCl
         </div>
       </nav>
       
-      {/* Category Quick Links */}
       {!isAdminActive && (
         <div className="bg-slate-50 border-t border-slate-200 overflow-x-auto whitespace-nowrap scrollbar-hide">
           <div className="container mx-auto px-4 flex space-x-8 py-3">
