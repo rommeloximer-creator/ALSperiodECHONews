@@ -6,20 +6,34 @@ import Login from './components/Login';
 import AdminDashboard from './components/AdminDashboard';
 import ArticleModal from './components/ArticleModal';
 import { Article } from './types';
-import { db } from './services/firebase'; // We import the cloud connection
+import { db } from './services/firebase'; 
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+
+// Default settings to fix the build error
+const defaultSettings = {
+  title: "ALS PeriodECHO",
+  subtitle: "Official Newsletter",
+  tagline: "Empowering Education",
+  bannerUrl: null,
+  logoUrl: null,
+  heroImageUrl: null,
+  heroDescription: "Welcome to our official newsletter site.",
+  useStaticHero: true,
+  facebookUrl: "#",
+  twitterUrl: "#",
+  instagramUrl: "#"
+};
 
 function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const [articles, setArticles] = useState<Article[]>([]); // Stores cloud articles
+  const [articles, setArticles] = useState<Article[]>([]); 
 
   // FETCH STORIES FROM FIREBASE
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        // Get stories, newest first
         const q = query(collection(db, "articles"), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
         
@@ -35,7 +49,7 @@ function App() {
     };
 
     fetchArticles();
-  }, []); // Empty brackets means "run once when page loads"
+  }, []); 
 
   if (isAdminLoggedIn) {
     return <AdminDashboard onLogout={() => setIsAdminLoggedIn(false)} />;
@@ -43,10 +57,18 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
-      <Header onAdminClick={() => setIsAdminOpen(true)} />
+      {/* FIXED: Added settings prop */}
+      <Header 
+        onAdminClick={() => setIsAdminOpen(true)} 
+        settings={defaultSettings} 
+      />
       
       <main>
-        <Hero />
+        {/* FIXED: Added settings and featuredArticle props */}
+        <Hero 
+          settings={defaultSettings} 
+          featuredArticle={articles[0]} 
+        />
         
         {/* LATEST NEWS SECTION */}
         <section id="news" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
@@ -103,7 +125,8 @@ function App() {
         </section>
       </main>
 
-      <Footer />
+      {/* FIXED: Added settings prop */}
+      <Footer settings={defaultSettings} />
 
       {/* MODALS */}
       {isAdminOpen && (
