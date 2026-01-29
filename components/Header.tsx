@@ -97,31 +97,32 @@ const Header: React.FC<HeaderProps> = ({
           </div>
         </nav>
 
-        {/* --- ROW 3: FUNCTIONAL CATEGORY LINKS --- */}
-        {!isAdminActive && (
-          <div className="border-t border-slate-100 overflow-x-auto whitespace-nowrap scrollbar-hide bg-white">
-            <div className="container mx-auto px-4 flex justify-center space-x-8 py-4">
-              {Object.values(Category).map((cat) => (
-                <button 
-                  key={cat}
-                  onClick={() => {
-                    // This triggers the filter in your main app file
-                    onCategorySelect(cat); 
-                    // Smoothly scrolls the user down to the news feed area
-                    const el = document.getElementById('news-feed');
-                    if (el) {
-                      const offset = 100; // Account for the sticky header
-                      const bodyRect = document.body.getBoundingClientRect().top;
-                      const elementRect = el.getBoundingClientRect().top;
-                      const elementPosition = elementRect - bodyRect;
-                      const offsetPosition = elementPosition - offset;
-
-                      window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                      });
-                    }
-                  }}
+       {/* --- ROW 3: CATEGORY LINKS --- */}
+{!isAdminActive && (
+  <div className="border-t border-slate-100 overflow-x-auto whitespace-nowrap scrollbar-hide bg-white">
+    <div className="container mx-auto px-4 flex justify-center space-x-8 py-4">
+      {Object.values(Category).map((cat) => (
+        <button 
+          key={cat}
+          onClick={() => {
+            // STEP 1 FIX: This line MUST be here to send the data to App.tsx
+            onCategorySelect(cat); 
+            
+            // This part handles the scrolling
+            const el = document.getElementById('news-feed');
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}
+          className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-500 hover:text-[#154897] focus:text-[#154897] transition-colors relative group"
+        >
+          {cat}
+          <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#154897] transition-all group-hover:w-full"></span>
+        </button>
+      ))}
+    </div>
+  </div>
+)}
                   className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-500 hover:text-[#154897] focus:text-[#154897] transition-colors relative group"
                 >
                   {cat}
