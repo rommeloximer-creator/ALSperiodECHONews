@@ -15,21 +15,19 @@ const Header: React.FC<HeaderProps> = ({ settings, auth, onAdminClick, onLoginCl
     <div className="bg-white border-b border-slate-200 shadow-sm relative z-40">
       
       {/* --- ROW 1: THE BIG BANNER (MASTHEAD) --- */}
-      {/* This section is full-width and dedicated ONLY to your logo */}
-      <div 
-        className="w-full flex justify-center items-center py-4 px-4 bg-slate-50 border-b border-slate-100 cursor-pointer"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      >
-        {settings.bannerUrl ? (
-          <img 
-            src={settings.bannerUrl} 
-            alt={settings.title} 
-            // FIX: We allow the image to be 100% wide (w-full) up to a max size
-            // We set h-auto so it grows naturally based on how wide it is
-            className="w-full max-w-5xl h-auto object-contain"
-            style={{ minHeight: '80px', maxHeight: '250px' }} 
-          />
-        ) : (
+<div 
+  className="w-full flex justify-center items-center py-2 px-2 bg-slate-50 border-b border-slate-100 cursor-pointer"
+  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+>
+  {settings.bannerUrl ? (
+    <img 
+      src={settings.bannerUrl} 
+      alt={settings.title} 
+      // Changed: Removed max-w-5xl and increased the height limits
+      className="w-full max-w-7xl h-auto object-contain"
+      style={{ minHeight: '120px', maxHeight: '400px' }} 
+    />
+  ) : (
           <div className="text-center py-6">
              <h1 className="font-serif font-black text-4xl md:text-6xl text-slate-900 tracking-tight">
                {settings.title}
