@@ -84,17 +84,32 @@ function App() {
         )}
         
         {/* LATEST NEWS SECTION */}
-        <section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-          <div className="border-b-4 border-slate-900 pb-4 mb-12">
-            <h2 className="text-4xl md:text-5xl font-black font-serif text-slate-900 uppercase">
-              {activeCategory === 'HEADLINE' ? 'Community Voice' : activeCategory}
-            </h2>
-            <p className="text-slate-500 font-bold tracking-widest uppercase text-sm mt-2">
-              {activeCategory === 'HEADLINE' 
-                ? 'Latest Journalism from the Field' 
-                : `Browsing all stories in ${activeCategory}`}
-            </p>
-          </div>
+<section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
+  <div className="border-b-4 border-slate-900 pb-4 mb-12">
+    <h2 className="text-4xl md:text-5xl font-black font-serif text-slate-900 uppercase">
+      {activeCategory === 'HEADLINE' ? 'Community Voice' : activeCategory}
+    </h2>
+  </div>
+
+  {/* CHANGE THIS: Use filteredArticles instead of articles */}
+  {filteredArticles.length === 0 ? (
+    <div className="text-center py-20 bg-slate-50 rounded-3xl border border-slate-100">
+      <p className="text-slate-400 font-bold text-lg">No stories found in this category.</p>
+    </div>
+  ) : (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+      {filteredArticles.map((article) => ( // <-- Use the filtered list here
+        <article 
+          key={article.id} 
+          className="group cursor-pointer flex flex-col h-full"
+          onClick={() => setSelectedArticle(article)}
+        >
+          {/* ... existing article card code ... */}
+        </article>
+      ))}
+    </div>
+  )}
+</section>
 
           {filteredArticles.length === 0 ? (
             <div className="text-center py-20 bg-slate-50 rounded-3xl border border-slate-100">
