@@ -116,7 +116,7 @@ const ArticleEditor: React.FC<ArticleEditorProps> = ({ article, onSave, onClose 
           <h3 className="text-2xl font-black font-serif text-slate-900 uppercase">
             {article ? 'Edit Story' : 'Write New Story'}
           </h3>
-          <button onClick={onCancel} className="text-slate-400 hover:text-red-500 transition-colors">
+          <button onClick={oncancel} className="text-slate-400 hover:text-red-500 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
             </svg>
@@ -225,7 +225,7 @@ const ArticleEditor: React.FC<ArticleEditorProps> = ({ article, onSave, onClose 
           <div className="pt-10 flex flex-col sm:flex-row justify-end gap-4 border-t border-slate-100">
             <button 
               type="button" 
-              onClick={onCancel}
+              onClick={oncancel}
               className="px-10 py-4 bg-slate-100 text-slate-600 font-bold rounded-full hover:bg-slate-200 transition-all uppercase tracking-widest text-xs"
             >
               Discard Changes
