@@ -7,7 +7,6 @@ interface HeaderProps {
   onAdminClick: () => void;
   onLoginClick: () => void;
   onLogoutClick: () => void;
-  // Added: This allows the parent component to react when a category is clicked
   onCategorySelect: (category: Category) => void;
   isAdminActive: boolean;
 }
@@ -25,10 +24,12 @@ const Header: React.FC<HeaderProps> = ({
     <div className="bg-white border-b border-slate-200 shadow-sm relative z-40">
       
       {/* --- ROW 1: THE BIG BANNER (MASTHEAD) --- */}
-      {/* Expanded the max-width and height to make the ALS PeriodECHO logo much more prominent */}
       <div 
         className="w-full flex justify-center items-center py-2 px-4 bg-slate-50 border-b border-slate-100 cursor-pointer"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        onClick={() => {
+          onCategorySelect('HEADLINE' as Category);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
       >
         {settings.bannerUrl ? (
           <img 
@@ -58,14 +59,14 @@ const Header: React.FC<HeaderProps> = ({
             <div 
               className="font-black text-slate-900 tracking-tighter text-lg cursor-pointer hover:text-[#154897] flex items-center"
               onClick={() => {
-                onCategorySelect('HEADLINE' as Category); // Reset to main feed
+                onCategorySelect('HEADLINE' as Category);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             >
               <span className="mr-2">🏠</span> HOME
             </div>
 
-            {/* Right side: Auth & Dashboard */}
+            {/* Right side: Admin Buttons */}
             <div className="flex items-center space-x-3">
               {auth.isAdmin && (
                 <button 
@@ -97,36 +98,22 @@ const Header: React.FC<HeaderProps> = ({
           </div>
         </nav>
 
-       {/* --- ROW 3: CATEGORY LINKS --- */}
-{!isAdminActive && (
-  <div className="border-t border-slate-100 overflow-x-auto whitespace-nowrap scrollbar-hide bg-white">
-    <div className="container mx-auto px-4 flex justify-center space-x-8 py-4">
-      {Object.values(Category).map((cat) => (
-        <button 
-          key={cat}
-          onClick={() => {
-            // STEP 1 FIX: This line MUST be here to send the data to App.tsx
-            onCategorySelect(cat); 
-            
-            // This part handles the scrolling
-            const el = document.getElementById('news-feed');
-            if (el) {
-              el.scrollIntoView({ behavior: 'smooth' });
-            }
-          }}
-          className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-500 hover:text-[#154897] focus:text-[#154897] transition-colors relative group"
-        >
-          {cat}
-          <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#154897] transition-all group-hover:w-full"></span>
-        </button>
-      ))}
-    </div>
-  </div>
-)}
+        {/* --- ROW 3: CATEGORY LINKS --- */}
+        {!isAdminActive && (
+          <div className="border-t border-slate-100 overflow-x-auto whitespace-nowrap scrollbar-hide bg-white">
+            <div className="container mx-auto px-4 flex justify-center space-x-8 py-4">
+              {Object.values(Category).map((cat) => (
+                <button 
+                  key={cat}
+                  // ADDED: MANDATORY TRIGGER FROM YOUR UPLOADED IMAGE
+                  onClick={() => {
+                    onCategorySelect(cat); // THIS LINE MUST BE PRESENT
+                    const el = document.getElementById('news-feed');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
                   className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-500 hover:text-[#154897] focus:text-[#154897] transition-colors relative group"
                 >
                   {cat}
-                  {/* Underline effect on hover */}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#154897] transition-all group-hover:w-full"></span>
                 </button>
               ))}
