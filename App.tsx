@@ -5,8 +5,8 @@ import Footer from './components/Footer';
 import Login from './components/Login';
 import AdminDashboard from './components/AdminDashboard';
 import ArticleModal from './components/ArticleModal';
-import { Article, Category } from './types'; 
-import { db } from './services/firebase'; 
+import { Article, Category } from './types';
+import { db } from './services/firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 const defaultSettings = {
@@ -27,10 +27,9 @@ function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const [articles, setArticles] = useState<Article[]>([]); 
+  const [articles, setArticles] = useState<Article[]>([]);
   const [activeCategory, setActiveCategory] = useState<Category | 'HEADLINE'>('HEADLINE');
 
-  // FETCH DATA
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -45,7 +44,6 @@ function App() {
     fetchArticles();
   }, []);
 
-  // FILTER LOGIC
   const filteredArticles = articles.filter(article => {
     if (activeCategory === 'HEADLINE') return true;
     const articleCat = String(article.category || "").toUpperCase().trim();
@@ -70,7 +68,6 @@ function App() {
       />
       
       <main>
-        {/* HERO SECTION - FIXED BRACKETS */}
         {activeCategory === 'HEADLINE' && (
           <Hero 
             settings={defaultSettings} 
@@ -94,7 +91,6 @@ function App() {
               <p className="text-slate-400 font-bold">No stories found in this category.</p>
             </div>
           ) : (
-            /* NEWS GRID */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
               {filteredArticles.map((article) => (
                 <article 
@@ -130,7 +126,6 @@ function App() {
         />
       )}
 
-      {/* ARTICLE MODAL - FIXED BRACKETS */}
       {selectedArticle && (
         <ArticleModal 
           article={selectedArticle} 
