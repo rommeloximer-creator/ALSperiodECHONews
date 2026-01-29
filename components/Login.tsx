@@ -14,8 +14,8 @@ const Login: React.FC<LoginProps> = ({ onClose, onLogin }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Use the user's hardcoded credentials for compatibility
-    if (username === 'rjoximer' && password === 'als123456') {
-      onLogin(true);
+if (username === 'rjoximer' && password === 'admin') {
+    onLogin(true);
       onClose();
     } else {
       setError(true);
