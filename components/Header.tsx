@@ -14,22 +14,23 @@ const Header: React.FC<HeaderProps> = ({ settings, auth, onAdminClick, onLoginCl
   return (
     <div className="bg-white border-b border-slate-200 shadow-sm relative z-40">
       
-      {/* SECTION 1: THE MASTHEAD (BANNER) */}
-      {/* We put this in its own full-width row so it can be as big as possible */}
+      {/* --- ROW 1: THE BIG BANNER (MASTHEAD) --- */}
+      {/* This section is full-width and dedicated ONLY to your logo */}
       <div 
-        className="w-full flex justify-center items-center py-6 px-4 bg-slate-50 border-b border-slate-100 cursor-pointer"
+        className="w-full flex justify-center items-center py-4 px-4 bg-slate-50 border-b border-slate-100 cursor-pointer"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       >
         {settings.bannerUrl ? (
           <img 
             src={settings.bannerUrl} 
             alt={settings.title} 
-            // FIX: 'w-full' lets it span the whole screen. 'max-w-4xl' keeps it from getting pixelated on giant monitors.
-            className="w-full max-w-5xl h-auto object-contain" 
-            style={{ minHeight: '80px' }} // Ensures it never collapses
+            // FIX: We allow the image to be 100% wide (w-full) up to a max size
+            // We set h-auto so it grows naturally based on how wide it is
+            className="w-full max-w-5xl h-auto object-contain"
+            style={{ minHeight: '80px', maxHeight: '250px' }} 
           />
         ) : (
-          <div className="text-center">
+          <div className="text-center py-6">
              <h1 className="font-serif font-black text-4xl md:text-6xl text-slate-900 tracking-tight">
                {settings.title}
              </h1>
@@ -40,17 +41,18 @@ const Header: React.FC<HeaderProps> = ({ settings, auth, onAdminClick, onLoginCl
         )}
       </div>
 
-      {/* SECTION 2: THE NAVIGATION BAR (Sticky) */}
+      {/* --- ROW 2: THE NAVIGATION BUTTONS --- */}
+      {/* This sticks to the top when scrolling, but stays UNDER the big banner */}
       <div className="sticky top-0 bg-white shadow-sm z-50">
         <nav className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             
-            {/* Left side: Small 'Home' label or Mini-logo when scrolling (Optional) */}
+            {/* Left side: A small 'Home' button for navigation */}
             <div 
-              className="font-black text-slate-900 tracking-tighter text-lg cursor-pointer hover:text-blue-900"
+              className="font-black text-slate-900 tracking-tighter text-lg cursor-pointer hover:text-[#154897] flex items-center"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
-              HOME
+              <span className="mr-2">🏠</span> HOME
             </div>
 
             {/* Right side: Admin Buttons */}
@@ -83,7 +85,7 @@ const Header: React.FC<HeaderProps> = ({ settings, auth, onAdminClick, onLoginCl
           </div>
         </nav>
 
-        {/* SECTION 3: CATEGORY LINKS */}
+        {/* --- ROW 3: CATEGORY LINKS --- */}
         {!isAdminActive && (
           <div className="border-t border-slate-100 overflow-x-auto whitespace-nowrap scrollbar-hide bg-white">
             <div className="container mx-auto px-4 flex justify-center space-x-8 py-3">
