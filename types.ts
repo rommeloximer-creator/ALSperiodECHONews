@@ -18,6 +18,7 @@ export interface Article {
   image?: string;     
   images?: string[];  
   content: string;
+  excerpt?: string;
   author: string;
   createdAt: any;     
   views?: number;     
