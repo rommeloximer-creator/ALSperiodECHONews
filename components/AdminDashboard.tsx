@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Article, SiteSettings, Category } from '../types';
 import { Icons } from '../constants';
@@ -13,7 +12,8 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ articles, settings, onSaveArticle, onDeleteArticle, onSaveSettings }) => {
-  const [activeTab, setActiveTab] = useState<'articles' | 'settings'>('articles');
+  // Added 'security' to the allowed tabs
+  const [activeTab, setActiveTab] = useState<'articles' | 'settings' | 'security'>('articles');
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   
@@ -21,6 +21,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ articles, settings, onS
   const [heroImagePreview, setHeroImagePreview] = useState<string | null>(settings.heroImage || null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(settings.bannerUrl || null);
   
+  // Security State
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [securityMessage, setSecurityMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
@@ -44,7 +49,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ articles, settings, onS
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        // Optimized max width for high-density displays
         const MAX_WIDTH = target === 'hero' ? 1920 : 2000;
         let width = img.width;
         let height = img.height;
@@ -85,6 +89,26 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ articles, settings, onS
     alert('Settings saved successfully!');
   };
 
+  const handlePasswordChange = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSecurityMessage(null);
+
+    if (newPassword.length < 4) {
+      setSecurityMessage({ text: 'Password must be at least 4 characters.', type: 'error' });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setSecurityMessage({ text: 'Passwords do not match.', type: 'error' });
+      return;
+    }
+
+    localStorage.setItem('admin_password', newPassword);
+    setSecurityMessage({ text: 'Password updated successfully!', type: 'success' });
+    setNewPassword('');
+    setConfirmPassword('');
+  };
+
   if (isCreating) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -99,25 +123,31 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ articles, settings, onS
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="flex justify-between items-center mb-10 border-b border-slate-200 pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-slate-200 pb-6 gap-4">
         <h2 className="text-3xl font-black text-slate-900 tracking-tight font-serif uppercase">Admin Control Panel</h2>
         <div className="flex bg-slate-100 p-1 rounded-xl">
           <button 
             onClick={() => setActiveTab('articles')}
-            className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${activeTab === 'articles' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}
+            className={`px-4 md:px-6 py-2 rounded-lg font-bold text-sm transition-all ${activeTab === 'articles' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}
           >
             Manage Stories
           </button>
           <button 
             onClick={() => setActiveTab('settings')}
-            className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${activeTab === 'settings' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}
+            className={`px-4 md:px-6 py-2 rounded-lg font-bold text-sm transition-all ${activeTab === 'settings' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}
           >
             Site Branding
+          </button>
+          <button 
+            onClick={() => setActiveTab('security')}
+            className={`px-4 md:px-6 py-2 rounded-lg font-bold text-sm transition-all ${activeTab === 'security' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}
+          >
+            Security
           </button>
         </div>
       </div>
 
-      {activeTab === 'articles' ? (
+      {activeTab === 'articles' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-bold text-slate-900">Manage Posts</h3>
@@ -181,7 +211,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ articles, settings, onS
             </table>
           </div>
         </div>
-      ) : (
+      )}
+
+      {activeTab === 'settings' && (
         <form onSubmit={saveSettings} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-6">
             <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
@@ -320,6 +352,55 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ articles, settings, onS
             </div>
           </div>
         </form>
+      )}
+
+      {activeTab === 'security' && (
+        <div className="max-w-md mx-auto">
+          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+            <h4 className="font-bold text-slate-900 border-b border-slate-100 pb-3 uppercase tracking-wider text-sm mb-6">Security Settings</h4>
+            
+            <form onSubmit={handlePasswordChange} className="space-y-6">
+              {securityMessage && (
+                <div className={`text-[11px] p-4 rounded-xl border text-center font-bold ${
+                  securityMessage.type === 'success' 
+                    ? 'bg-green-50 text-green-600 border-green-100' 
+                    : 'bg-red-50 text-red-600 border-red-100'
+                }`}>
+                  {securityMessage.text}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">New Password</label>
+                <input 
+                  type="password" 
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-600 outline-none"
+                  placeholder="Enter new password"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Confirm New Password</label>
+                <input 
+                  type="password" 
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-600 outline-none"
+                  placeholder="Confirm new password"
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                className="w-full bg-slate-900 text-white font-black py-4 rounded-xl hover:bg-teal-700 transition-all shadow-lg hover:-translate-y-1 uppercase tracking-widest text-xs"
+              >
+                Update Password
+              </button>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
