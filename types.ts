@@ -14,15 +14,15 @@ export enum Category {
 export interface Article {
   id: string;
   title: string;
-  category: string; 
-  image?: string;     
-  images?: string[];  
+  category: string;
+  image?: string;
+  images?: string[];
   content: string;
-  excerpt?: string;
+  excerpt?: string; 
   author: string;
-  createdAt: any;     
-  views?: number;     
-  likes?: number;     
+  createdAt: any;
+  views?: number;
+  likes?: number;
   isFeatured?: boolean;
 }
 
