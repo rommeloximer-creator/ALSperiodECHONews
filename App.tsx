@@ -89,10 +89,13 @@ function App() {
       <main>
         {activeCategory === 'HEADLINE' && (
           <Hero 
-            settings={defaultSettings} 
-            featuredArticle={articles[0]} 
-          />
-        )}
+  settings={defaultSettings} 
+  featuredArticle={articles[0] || null} 
+  onReadClick={(id) => {
+    const article = articles.find(a => a.id === id);
+    if (article) setSelectedArticle(article);
+  }} 
+/>
         
         <section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
           <div className="border-b-4 border-slate-900 pb-4 mb-12">
@@ -170,10 +173,11 @@ function App() {
       )}
 
       {selectedArticle && (
-        <ArticleModal 
-          article={selectedArticle} 
-          onClose={() => setSelectedArticle(null)} 
-        />
+       <ArticleModal 
+  article={selectedArticle} 
+  onClose={() => setSelectedArticle(null)} 
+  onLike={(id) => console.log('Liked article:', id)} 
+/>
       )}
     </div>
   );
