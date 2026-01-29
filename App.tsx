@@ -1,3 +1,28 @@
+import React, { useState, useEffect } from 'react';
+import Header from './components/Header';
+import Hero from './components/Hero';
+import Footer from './components/Footer';
+import Login from './components/Login';
+import AdminDashboard from './components/AdminDashboard';
+import ArticleModal from './components/ArticleModal';
+import { Article, Category } from './types'; 
+import { db } from './services/firebase'; 
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+
+const defaultSettings = {
+  title: "ALS PeriodECHO",
+  subtitle: "Official Newsletter",
+  tagline: "Empowering Education",
+  bannerUrl: null,
+  logoUrl: null,
+  heroImageUrl: null,
+  heroDescription: "Welcome to our official newsletter site.",
+  useStaticHero: true,
+  facebookUrl: "#",
+  twitterUrl: "#",
+  instagramUrl: "#"
+};
+
 function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
@@ -5,12 +30,45 @@ function App() {
   const [articles, setArticles] = useState<Article[]>([]); 
   const [activeCategory, setActiveCategory] = useState<Category | 'HEADLINE'>('HEADLINE');
 
-  // ... useEffect logic for Firebase remains the same ...
+  // 1. FETCH STORIES FROM FIREBASE
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const q = query(collection(db, "articles"), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        
+        const fetchedArticles: Article[] = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Article));
+        
+        setArticles(fetchedArticles);
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+      }
+    };
+    fetchArticles();
+  }, []); 
 
-  // FIX: Case-insensitive filtering to prevent data mismatch
+  // 2. SCROLL EFFECT: Moves screen to news when a category is clicked
+  useEffect(() => {
+    if (activeCategory !== 'HEADLINE') {
+      const element = document.getElementById('news-feed');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [activeCategory]);
+
+  // 3. ROBUST FILTER LOGIC: Matches categories regardless of BIG or small letters
   const filteredArticles = articles.filter(article => {
     if (activeCategory === 'HEADLINE') return true;
-    return article.category?.toUpperCase() === activeCategory.toUpperCase();
+
+    // Standardizes both strings (Removes spaces and makes them Uppercase)
+    const articleCat = (article.category || "").replace(/\s+/g, '').toUpperCase();
+    const activeCat = activeCategory.replace(/\s+/g, '').toUpperCase();
+
+    return articleCat === activeCat;
   });
 
   if (isAdminLoggedIn) {
@@ -32,15 +90,23 @@ function App() {
       <main>
         {/* Only show Hero on the main Headline view */}
         {activeCategory === 'HEADLINE' && (
-          <Hero settings={defaultSettings} featuredArticle={articles[0]} />
+          <Hero 
+            settings={defaultSettings} 
+            featuredArticle={articles[0]} 
+          />
         )}
         
-        {/* SINGLE News Section - Removed duplicates */}
+        {/* NEWS SECTION */}
         <section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
           <div className="border-b-4 border-slate-900 pb-4 mb-12">
             <h2 className="text-4xl md:text-5xl font-black font-serif text-slate-900 uppercase">
               {activeCategory === 'HEADLINE' ? 'Community Voice' : activeCategory}
             </h2>
+            <p className="text-slate-500 font-bold tracking-widest uppercase text-sm mt-2">
+              {activeCategory === 'HEADLINE' 
+                ? 'Latest Journalism from the Field' 
+                : `Browsing all stories in ${activeCategory}`}
+            </p>
           </div>
 
           {filteredArticles.length === 0 ? (
@@ -71,12 +137,15 @@ function App() {
                       {article.category}
                     </div>
                   </div>
+                  
                   <h3 className="text-2xl font-bold font-serif leading-tight mb-3 group-hover:text-blue-900 transition-colors line-clamp-2">
                     {article.title}
                   </h3>
+                  
                   <p className="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-4 flex-grow">
                     {article.content}
                   </p>
+
                   <div className="flex items-center text-xs font-bold text-slate-400 uppercase tracking-wider mt-auto pt-4 border-t border-slate-100">
                     <span>{new Date(article.createdAt).toLocaleDateString()}</span>
                     <span className="mx-2">•</span>
@@ -103,8 +172,13 @@ function App() {
       )}
 
       {selectedArticle && (
-        <ArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />
+        <ArticleModal 
+          article={selectedArticle} 
+          onClose={() => setSelectedArticle(null)} 
+        />
       )}
     </div>
   );
 }
+
+export default App;
