@@ -30,7 +30,7 @@ function App() {
   const [articles, setArticles] = useState<Article[]>([]); 
   const [activeCategory, setActiveCategory] = useState<Category | 'HEADLINE'>('HEADLINE');
 
-  // 1. FETCH STORIES FROM FIREBASE
+  // FETCH STORIES FROM FIREBASE
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -50,7 +50,7 @@ function App() {
     fetchArticles();
   }, []); 
 
-  // 2. SCROLL EFFECT: Moves screen to news when a category is clicked
+  // SCROLL EFFECT: Moves screen to news when a category is clicked
   useEffect(() => {
     if (activeCategory !== 'HEADLINE') {
       const element = document.getElementById('news-feed');
@@ -60,16 +60,15 @@ function App() {
     }
   }, [activeCategory]);
 
- // 3. UNIVERSAL FILTER LOGIC: Ignores spaces, case, AND special characters
-const filteredArticles = articles.filter(article => {
-  if (activeCategory === 'HEADLINE') return true;
+  // --- ADDED FROM IMAGE: ROBUST FILTER LOGIC ---
+  const filteredArticles = articles.filter(article => {
+    if (activeCategory === 'HEADLINE') return true;
 
-  // This removes EVERYTHING except letters (removes spaces, slashes, dashes)
-  const articleCat = (article.category || "").toUpperCase().replace(/[^A-Z]/g, '');
-  const activeCat = activeCategory.toUpperCase().replace(/[^A-Z]/g, '');
+    const articleCat = String(article.category || "").toUpperCase().trim();
+    const activeCat = String(activeCategory).toUpperCase().trim();
 
-  return articleCat === activeCat;
-});
+    return articleCat === activeCat;
+  });
 
   if (isAdminLoggedIn) {
     return <AdminDashboard onLogout={() => setIsAdminLoggedIn(false)} />;
@@ -88,7 +87,6 @@ const filteredArticles = articles.filter(article => {
       />
       
       <main>
-        {/* Only show Hero on the main Headline view */}
         {activeCategory === 'HEADLINE' && (
           <Hero 
             settings={defaultSettings} 
@@ -96,7 +94,6 @@ const filteredArticles = articles.filter(article => {
           />
         )}
         
-        {/* NEWS SECTION */}
         <section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
           <div className="border-b-4 border-slate-900 pb-4 mb-12">
             <h2 className="text-4xl md:text-5xl font-black font-serif text-slate-900 uppercase">
@@ -120,6 +117,7 @@ const filteredArticles = articles.filter(article => {
               </button>
             </div>
           ) : (
+            // --- ADDED FROM IMAGE: MAPPING FILTERED ARTICLES ---
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
               {filteredArticles.map((article) => (
                 <article 
