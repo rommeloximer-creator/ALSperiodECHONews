@@ -60,16 +60,16 @@ function App() {
     }
   }, [activeCategory]);
 
-  // 3. ROBUST FILTER LOGIC: Matches categories regardless of BIG or small letters
-  const filteredArticles = articles.filter(article => {
-    if (activeCategory === 'HEADLINE') return true;
+ // 3. UNIVERSAL FILTER LOGIC: Ignores spaces, case, AND special characters
+const filteredArticles = articles.filter(article => {
+  if (activeCategory === 'HEADLINE') return true;
 
-    // Standardizes both strings (Removes spaces and makes them Uppercase)
-    const articleCat = (article.category || "").replace(/\s+/g, '').toUpperCase();
-    const activeCat = activeCategory.replace(/\s+/g, '').toUpperCase();
+  // This removes EVERYTHING except letters (removes spaces, slashes, dashes)
+  const articleCat = (article.category || "").toUpperCase().replace(/[^A-Z]/g, '');
+  const activeCat = activeCategory.toUpperCase().replace(/[^A-Z]/g, '');
 
-    return articleCat === activeCat;
-  });
+  return articleCat === activeCat;
+});
 
   if (isAdminLoggedIn) {
     return <AdminDashboard onLogout={() => setIsAdminLoggedIn(false)} />;
