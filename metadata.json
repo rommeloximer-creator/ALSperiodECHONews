@@ -1,0 +1,7 @@
+{
+  "name": "ALS PeriodECHO CMS",
+  "description": "A sophisticated digital news and storytelling platform for the ALS community, featuring AI-powered content enhancement and robust multi-image management.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
