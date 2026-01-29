@@ -7,10 +7,10 @@ import { enhanceArticle, suggestCategory, researchTopic } from '../services/gemi
 interface ArticleEditorProps {
   article: Article | null;
   onSave: (article: Article) => void;
-  onCancel: () => void;
+  onClose: () => void;
 }
 
-const ArticleEditor: React.FC<ArticleEditorProps> = ({ article, onSave, onCancel }) => {
+const ArticleEditor: React.FC<ArticleEditorProps> = ({ article, onSave, onClose }) => {
   const [formData, setFormData] = useState<Partial<Article>>(
     article || {
       id: crypto.randomUUID(),
