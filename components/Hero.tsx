@@ -1,25 +1,28 @@
-
 import React from 'react';
 import { SiteSettings, Article } from '../types';
 
 interface HeroProps {
   settings: SiteSettings;
   featuredArticle: Article | null;
-  onReadClick: (id: string) => void;
+  onReadClick: (id: string) => void; // This matches the ID expected in App.tsx
 }
 
 const Hero: React.FC<HeroProps> = ({ settings, featuredArticle, onReadClick }) => {
+  // Use static mode if settings say so OR if there is no featured article
   const isStatic = settings.useStaticHero || !featuredArticle;
   
+  // Decide which text to show
   const title = isStatic ? `Welcome to ${settings.title}` : featuredArticle.title;
-  const excerpt = isStatic ? settings.heroDescription : featuredArticle.excerpt;
+  const excerpt = isStatic ? settings.heroDescription : (featuredArticle.excerpt || "");
   
+  // Image logic: fallbacks to ensure an image always shows
   const customImage = settings.heroImage && settings.heroImage.trim() !== '' ? settings.heroImage : null;
   const defaultImage = settings.heroImageUrl || 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&q=80&w=2071';
   
+  // Safe image selection
   const image = isStatic 
     ? (customImage || defaultImage) 
-    : (featuredArticle.images[0] || customImage || defaultImage);
+    : (featuredArticle.images && featuredArticle.images[0] ? featuredArticle.images[0] : (customImage || defaultImage));
 
   const badge = isStatic ? 'OFFICIAL PUBLICATION' : 'FEATURED STORY';
 
@@ -55,7 +58,7 @@ const Hero: React.FC<HeroProps> = ({ settings, featuredArticle, onReadClick }) =
             </div>
 
             <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start pt-4">
-              {!isStatic ? (
+              {!isStatic && featuredArticle ? (
                 <button 
                   onClick={() => onReadClick(featuredArticle.id)}
                   className="px-12 py-5 bg-[#cc2127] text-white font-black rounded-full hover:bg-white hover:text-slate-900 transition-all shadow-2xl hover:-translate-y-1 uppercase tracking-widest text-xs"
