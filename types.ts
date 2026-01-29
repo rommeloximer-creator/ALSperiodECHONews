@@ -13,7 +13,7 @@ export enum Category {
 }
 
 export interface Article {
-  
+  id: string;
   title: string;
   category: string;
   image?: string;     // Added this to fix "Property image does not exist"
