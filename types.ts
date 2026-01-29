@@ -1,4 +1,3 @@
-
 export enum Category {
   HEADLINE = 'Headline',
   NEWS = 'News',
@@ -15,13 +14,13 @@ export enum Category {
 export interface Article {
   id: string;
   title: string;
-  category: string;
-  image?: string;     // Added this to fix "Property image does not exist"
+  category: string; 
+  image?: string;     
   images?: string[];  
   content: string;
   author: string;
-  createdAt: any;     // Changed to 'any' to stop the "incompatible type" error
-  views?: number;     // Added this to fix "Property views does not exist"
+  createdAt: any;     
+  views?: number;     
   likes?: number;     
   isFeatured?: boolean;
 }
@@ -33,7 +32,7 @@ export interface SiteSettings {
   bannerUrl: string | null;
   logoUrl: string | null;
   heroImageUrl: string | null;
-  heroImage?: string; // New property for custom override
+  heroImage?: string; 
   heroDescription: string;
   useStaticHero: boolean;
   facebookUrl: string;
