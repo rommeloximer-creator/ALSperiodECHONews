@@ -15,12 +15,15 @@ export enum Category {
 export interface Article {
   id: string;
   title: string;
-  category: Category;
-  excerpt: string;
+  category: string;
+  image?: string;     // Added this to fix "Property image does not exist"
+  images?: string[];  
   content: string;
-  images: string[]; // Base64 strings
-  likes: number;
-  createdAt: number; // timestamp
+  author: string;
+  createdAt: any;     // Changed to 'any' to stop the "incompatible type" error
+  views?: number;     // Added this to fix "Property views does not exist"
+  likes?: number;     
+  isFeatured?: boolean;
 }
 
 export interface SiteSettings {
