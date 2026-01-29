@@ -25,8 +25,9 @@ const Header: React.FC<HeaderProps> = ({ settings, auth, onAdminClick, onLoginCl
                 <img 
                   src={settings.bannerUrl} 
                   alt={settings.title} 
-                  // UPDATED: Changed h-16/h-24 to h-28/h-56 for a much bigger banner size
-                  className="h-28 md:h-56 w-auto object-contain" 
+                  // UPDATED: "h-auto" lets it scale naturally, "max-h" keeps it from blocking the screen
+                  // "object-left" keeps it aligned to the start
+                  className="h-auto w-auto max-h-32 md:max-h-56 object-contain object-left" 
                 />
               ) : (
                 <div className="flex items-center space-x-3">
