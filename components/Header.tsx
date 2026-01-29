@@ -16,20 +16,18 @@ const Header: React.FC<HeaderProps> = ({ settings, auth, onAdminClick, onLoginCl
     <div className="sticky top-0 z-40">
       <nav className="bg-white border-b border-slate-200 shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center min-h-[90px] py-3">
+          <div className="flex justify-between items-center py-6">
             <div 
               className="flex items-center cursor-pointer transition-transform hover:scale-[1.01]" 
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
               {settings.bannerUrl ? (
-                <img 
-                  src={settings.bannerUrl} 
-                  alt={settings.title} 
-                  // UPDATED: "h-auto" lets it scale naturally, "max-h" keeps it from blocking the screen
-                  // "object-left" keeps it aligned to the start
-                  className="h-auto w-auto max-h-32 md:max-h-56 object-contain object-left" 
-                />
-              ) : (
+  <img 
+    src={settings.bannerUrl} 
+    alt={settings.title} 
+    className="h-auto w-auto max-h-[120px] md:max-h-[160px] object-contain object-left" 
+  />
+) : (
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold border-2 border-yellow-400 shadow-md">
                     <span className="text-sm">ALS</span>
