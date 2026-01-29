@@ -74,7 +74,7 @@ function App() {
         onCategorySelect={(cat) => setActiveCategory(cat)} 
       />
       
-      <main>
+     <main>
         {/* Only show Hero on the main Headline view */}
         {activeCategory === 'HEADLINE' && (
           <Hero 
@@ -83,33 +83,67 @@ function App() {
           />
         )}
         
-        {/* LATEST NEWS SECTION */}
-<section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-  <div className="border-b-4 border-slate-900 pb-4 mb-12">
-    <h2 className="text-4xl md:text-5xl font-black font-serif text-slate-900 uppercase">
-      {activeCategory === 'HEADLINE' ? 'Community Voice' : activeCategory}
-    </h2>
-  </div>
+        {/* LATEST NEWS SECTION - Only one block needed */}
+        <section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
+          <div className="border-b-4 border-slate-900 pb-4 mb-12">
+            <h2 className="text-4xl md:text-5xl font-black font-serif text-slate-900 uppercase">
+              {activeCategory === 'HEADLINE' ? 'Community Voice' : activeCategory}
+            </h2>
+            <p className="text-slate-500 font-bold tracking-widest uppercase text-sm mt-2">
+              {activeCategory === 'HEADLINE' 
+                ? 'Latest Journalism from the Field' 
+                : `Browsing all stories in ${activeCategory}`}
+            </p>
+          </div>
 
-  {/* CHANGE THIS: Use filteredArticles instead of articles */}
-  {filteredArticles.length === 0 ? (
-    <div className="text-center py-20 bg-slate-50 rounded-3xl border border-slate-100">
-      <p className="text-slate-400 font-bold text-lg">No stories found in this category.</p>
-    </div>
-  ) : (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-      {filteredArticles.map((article) => ( // <-- Use the filtered list here
-        <article 
-          key={article.id} 
-          className="group cursor-pointer flex flex-col h-full"
-          onClick={() => setSelectedArticle(article)}
-        >
-          {/* ... existing article card code ... */}
-        </article>
-      ))}
-    </div>
-  )}
-</section>
+          {filteredArticles.length === 0 ? (
+            <div className="text-center py-20 bg-slate-50 rounded-3xl border border-slate-100">
+              <p className="text-slate-400 font-bold text-lg">No stories found in this category.</p>
+              <button 
+                onClick={() => setActiveCategory('HEADLINE')}
+                className="text-blue-600 font-bold mt-4 hover:underline"
+              >
+                Back to All News
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+              {filteredArticles.map((article) => (
+                <article 
+                  key={article.id} 
+                  className="group cursor-pointer flex flex-col h-full"
+                  onClick={() => setSelectedArticle(article)}
+                >
+                  <div className="relative overflow-hidden rounded-2xl mb-5 aspect-[4/3] shadow-sm border border-slate-100">
+                    <img 
+                      src={article.image || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=1000"} 
+                      alt={article.title}
+                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-4 left-4 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">
+                      {article.category}
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold font-serif leading-tight mb-3 group-hover:text-blue-900 transition-colors line-clamp-2">
+                    {article.title}
+                  </h3>
+                  
+                  <p className="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-4 flex-grow">
+                    {article.content}
+                  </p>
+
+                  <div className="flex items-center text-xs font-bold text-slate-400 uppercase tracking-wider mt-auto pt-4 border-t border-slate-100">
+                    <span>{new Date(article.createdAt).toLocaleDateString()}</span>
+                    <span className="mx-2">•</span>
+                    <span>Read Story →</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
 
           {filteredArticles.length === 0 ? (
             <div className="text-center py-20 bg-slate-50 rounded-3xl border border-slate-100">
