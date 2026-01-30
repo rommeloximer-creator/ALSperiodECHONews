@@ -8,6 +8,7 @@ import ArticleModal from './components/ArticleModal';
 import { Article, Category } from './types';
 import { db } from './services/firebase';
 import { collection, getDocs, query, orderBy, doc, getDoc } from 'firebase/firestore';
+
 const defaultSettings = {
   title: "ALS PeriodECHO",
   subtitle: "Official Newsletter",
@@ -29,7 +30,8 @@ function App() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [activeCategory, setActiveCategory] = useState<Category | 'HEADLINE'>('HEADLINE');
   const [settings, setSettings] = useState<any>(null);
-useEffect(() => {
+
+  useEffect(() => {
     const fetchArticles = async () => {
       try {
         const q = query(collection(db, "articles"), orderBy("createdAt", "desc"));
@@ -41,7 +43,6 @@ useEffect(() => {
       }
     };
 
-    // --- ADDED SETTINGS FETCH ---
     const fetchSettings = async () => {
       const docRef = doc(db, 'settings', 'site_config');
       const docSnap = await getDoc(docRef);
@@ -51,7 +52,7 @@ useEffect(() => {
     };
 
     fetchArticles();
-    fetchSettings(); // This triggers the settings load
+    fetchSettings();
   }, []);
 
   const filteredArticles = articles.filter(article => {
@@ -67,28 +68,18 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
+      {/* Header and Hero now sit at the top, receiving data from your Firebase settings */}
+      <Header settings={settings} />
       <Hero 
-          settings={settings}
-          articles={articles}
-          onArticleClick={(article: Article) => setSelectedArticle(article)}
-        />
-        <Header settings={settings} />
+        settings={settings} 
+        featuredArticle={articles[0] || null} 
+        onReadClick={(id) => {
+          const article = articles.find(a => a.id === id);
+          if (article) setSelectedArticle(article);
+        }}
+      />
       
       <main>
-        {activeCategory === 'HEADLINE' && (
-        <>
-          <>
-          <Hero 
-            settings={settings} 
-            featuredArticle={articles[0] || null} 
-            onReadClick={(id) => {
-              const article = articles.find(a => a.id === id);
-              if (article) setSelectedArticle(article);
-            }}
-          />
-          <Header settings={settings} />
-        </>
-        
         <section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
           <div className="border-b-4 border-slate-900 pb-4 mb-12">
             <h2 className="text-4xl font-serif font-black uppercase">
@@ -140,8 +131,18 @@ useEffect(() => {
         <ArticleModal 
           article={selectedArticle} 
           onClose={() => setSelectedArticle(null)} 
-          onLike={() => console.log('Liked story')} // Removed the (id) argument here
+          onLike={() => console.log('Liked story')} 
         />
+      )}
+      
+      {/* Floating Admin Access Button */}
+      {!isAdminLoggedIn && (
+        <button 
+          onClick={() => setIsAdminOpen(true)}
+          className="fixed bottom-8 right-8 bg-slate-900 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform"
+        >
+          Admin
+        </button>
       )}
     </div>
   );
