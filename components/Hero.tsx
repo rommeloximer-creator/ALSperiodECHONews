@@ -2,12 +2,12 @@ import React from 'react';
 import { SiteSettings, Article } from '../types';
 
 interface HeroProps {
-  articles: Article[];
-  onArticleClick: (article: Article) => void;
-  settings?: any; // This line "unlocks" the door for settings
+  featuredArticle: Article | null; // This fixes the 'featuredArticle does not exist' error
+  onReadClick: (id: string) => void; // This fixes the 'onReadClick does not exist' error
+  settings?: any; // This allows the Hero to receive your site settings from Firebase
 }
 
-const Hero: React.FC<HeroProps> = ({ settings, featuredArticle, onReadClick }) => {
+const Hero: React.FC<HeroProps> = ({ featuredArticle, onReadClick, settings }) => {
   // Use static mode if settings say so OR if there is no featured article
   const isStatic = settings.useStaticHero || !featuredArticle;
   
