@@ -76,16 +76,17 @@ useEffect(() => {
       
       <main>
         {activeCategory === 'HEADLINE' && (
-        <Hero 
-          settings={settings} 
-          featuredArticle={articles[0] || null} 
-          onReadClick={(id) => {
-            const article = articles.find(a => a.id === id);
-            if (article) handleArticleClick(article);
-          }}
-        />
-        <Header settings={settings} />
-        )}
+        <>
+          <Hero 
+            settings={settings} 
+            featuredArticle={articles[0] || null} 
+            onReadClick={(id) => {
+              const article = articles.find(a => a.id === id);
+              if (article) setSelectedArticle(article);
+            }}
+          />
+          <Header settings={settings} />
+        </>
         
         <section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
           <div className="border-b-4 border-slate-900 pb-4 mb-12">
