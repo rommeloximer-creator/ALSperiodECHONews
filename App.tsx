@@ -130,7 +130,6 @@ function App() {
 
       {/* ARTICLE MODAL - Corrected ID argument type */}
       {selectedArticle && (
-       {selectedArticle && (
         <ArticleModal 
           article={selectedArticle} 
           onClose={() => setSelectedArticle(null)} 
