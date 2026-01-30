@@ -52,7 +52,16 @@ function App() {
     fetchSettings();
   }, []);
 
-  if (!settings) return <div className="p-20 text-center font-bold animate-pulse">Loading ALS PeriodECHO...</div>;
+  // --- LOADING CHECK ---
+  if (!settings) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center font-bold animate-pulse text-slate-400">
+          Loading ALS PeriodECHO...
+        </div>
+      </div>
+    );
+  }
 
   if (isAdminLoggedIn) {
     return <AdminDashboard onLogout={() => setIsAdminLoggedIn(false)} />;
@@ -73,50 +82,62 @@ function App() {
       
       <main className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
         <div className="border-b-4 border-slate-900 pb-4 mb-12">
-          <h2 className="text-4xl font-serif font-black uppercase">
+          <h2 className="text-4xl font-serif font-black uppercase text-slate-900">
             {activeCategory === 'HEADLINE' ? 'Community Voice' : activeCategory}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-          {articles.filter(a => activeCategory === 'HEADLINE' || a.category === activeCategory).map((article) => (
-            <article key={article.id} className="group cursor-pointer" onClick={() => setSelectedArticle(article)}>
-              <div className="relative overflow-hidden rounded-2xl mb-5 aspect-[4/3] border border-slate-100">
-                <img 
-                  src={article.image || "https://images.unsplash.com/photo-1504711434969-e33886168f5c"} 
-                  className="object-cover w-full h-full group-hover:scale-105 transition-transform"
-                  alt=""
-                />
-              </div>
-              <h3 className="text-2xl font-bold font-serif mb-3">{article.title}</h3>
-              <p className="text-slate-500 line-clamp-3">{article.content}</p>
-            </article>
-          ))}
+          {articles
+            .filter(a => activeCategory === 'HEADLINE' || a.category === activeCategory)
+            .map((article) => (
+              <article 
+                key={article.id} 
+                className="group cursor-pointer flex flex-col h-full" 
+                onClick={() => setSelectedArticle(article)}
+              >
+                <div className="relative overflow-hidden rounded-2xl mb-5 aspect-[4/3] border border-slate-100">
+                  <img 
+                    src={article.image || "https://images.unsplash.com/photo-1504711434969-e33886168f5c"} 
+                    className="object-cover w-full h-full group-hover:scale-105 transition-transform"
+                    alt={article.title}
+                  />
+                </div>
+                <h3 className="text-2xl font-bold font-serif mb-3 line-clamp-2">{article.title}</h3>
+                <p className="text-slate-500 text-sm line-clamp-3 mb-4">{article.content}</p>
+              </article>
+            ))}
         </div>
       </main>
 
       <Footer settings={settings} />
 
       {!isAdminLoggedIn && (
-        <button onClick={() => setIsAdminOpen(true)} className="fixed bottom-8 right-8 bg-slate-900 text-white p-4 rounded-full shadow-2xl z-50">
-          🔐 Admin
+        <button 
+          onClick={() => setIsAdminOpen(true)} 
+          className="fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl z-50 font-bold text-sm"
+        >
+          🔐 Admin Access
         </button>
       )}
 
-      {isAdminOpen && <Login onClose={() => setIsAdminOpen(false)} onLogin={(admin) => admin && setIsAdminLoggedIn(true)} />}
+      {isAdminOpen && (
+        <Login 
+          onClose={() => setIsAdminOpen(false)} 
+          onLogin={(admin) => admin && setIsAdminLoggedIn(true)} 
+        />
+      )}
+
       {selectedArticle && (
-        {selectedArticle && (
-       {selectedArticle && (
         <ArticleModal 
           article={selectedArticle} 
-          onClose={() => setSelectedArticle(null)} 
+          onClose={() => setSelectedArticle(null)}
           onLike={async () => {
             try {
               const articleRef = doc(db, 'articles', selectedArticle.id);
               await updateDoc(articleRef, {
                 likes: (selectedArticle.likes || 0) + 1
               });
-              // Local state update for instant visual feedback
               setArticles(articles.map(a => 
                 a.id === selectedArticle.id ? { ...a, likes: (a.likes || 0) + 1 } : a
               ));
@@ -126,4 +147,8 @@ function App() {
           }}
         />
       )}
+    </div>
+  );
+}
+
 export default App;
