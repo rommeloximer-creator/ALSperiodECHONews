@@ -13,14 +13,9 @@ const defaultSettings = {
   title: "ALS PeriodECHO",
   subtitle: "Official Newsletter",
   tagline: "Empowering Education",
-  bannerUrl: null,
-  logoUrl: null,
-  heroImageUrl: null,
-  heroDescription: "Welcome to our official newsletter site.",
-  useStaticHero: true,
-  facebookUrl: "#",
-  twitterUrl: "#",
-  instagramUrl: "#"
+  bannerUrl: "", 
+  heroImageUrl: "", 
+  brandingType: "Standard"
 };
 
 function App() {
@@ -39,22 +34,16 @@ function App() {
         const fetched = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Article));
         setArticles(fetched);
       } catch (error) {
-        console.error("Error fetching articles:", error);
+        console.error("Error:", error);
       }
     };
 
     const fetchSettings = async () => {
-      try {
-        const docRef = doc(db, 'settings', 'site_config');
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setSettings(docSnap.data());
-        } else {
-          // If no Firebase settings found, use defaults so site doesn't stay blank
-          setSettings(defaultSettings);
-        }
-      } catch (error) {
-        console.error("Error fetching settings:", error);
+      const docRef = doc(db, 'settings', 'site_config');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setSettings(docSnap.data());
+      } else {
         setSettings(defaultSettings);
       }
     };
@@ -63,24 +52,7 @@ function App() {
     fetchSettings();
   }, []);
 
-  const filteredArticles = articles.filter(article => {
-    if (activeCategory === 'HEADLINE') return true;
-    const articleCat = String(article.category || "").toUpperCase().trim();
-    const activeCat = String(activeCategory).toUpperCase().trim();
-    return articleCat === activeCat;
-  });
-
-  // --- SAFETY CHECK: Prevent Blank Screen while loading ---
-  if (!settings) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center">
-          <div className="text-2xl font-black text-slate-900 animate-pulse mb-2">ALS PeriodECHO</div>
-          <p className="text-slate-400 font-medium">Loading site settings...</p>
-        </div>
-      </div>
-    );
-  }
+  if (!settings) return <div className="p-20 text-center font-bold animate-pulse">Loading ALS PeriodECHO...</div>;
 
   if (isAdminLoggedIn) {
     return <AdminDashboard onLogout={() => setIsAdminLoggedIn(false)} />;
@@ -99,71 +71,40 @@ function App() {
         }}
       />
       
-      <main>
-        <section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-          <div className="border-b-4 border-slate-900 pb-4 mb-12 flex justify-between items-end">
-            <h2 className="text-4xl font-serif font-black uppercase">
-              {activeCategory === 'HEADLINE' ? 'Community Voice' : activeCategory}
-            </h2>
-          </div>
+      <main className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="border-b-4 border-slate-900 pb-4 mb-12">
+          <h2 className="text-4xl font-serif font-black uppercase">
+            {activeCategory === 'HEADLINE' ? 'Community Voice' : activeCategory}
+          </h2>
+        </div>
 
-          {filteredArticles.length === 0 ? (
-            <div className="text-center py-20 bg-slate-50 rounded-3xl">
-              <p className="text-slate-400 font-bold">No stories found in this category.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-              {filteredArticles.map((article) => (
-                <article 
-                  key={article.id} 
-                  className="group cursor-pointer flex flex-col h-full"
-                  onClick={() => setSelectedArticle(article)}
-                >
-                  <div className="relative overflow-hidden rounded-2xl mb-5 aspect-[4/3] border border-slate-100">
-                    <img 
-                      src={article.image || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=1000"} 
-                      alt={article.title}
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform"
-                    />
-                  </div>
-                  <h3 className="text-2xl font-bold font-serif mb-3 line-clamp-2">{article.title}</h3>
-                  <p className="text-slate-500 text-sm line-clamp-3 mb-4">{article.content}</p>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+          {articles.filter(a => activeCategory === 'HEADLINE' || a.category === activeCategory).map((article) => (
+            <article key={article.id} className="group cursor-pointer" onClick={() => setSelectedArticle(article)}>
+              <div className="relative overflow-hidden rounded-2xl mb-5 aspect-[4/3] border border-slate-100">
+                <img 
+                  src={article.image || "https://images.unsplash.com/photo-1504711434969-e33886168f5c"} 
+                  className="object-cover w-full h-full group-hover:scale-105 transition-transform"
+                  alt=""
+                />
+              </div>
+              <h3 className="text-2xl font-bold font-serif mb-3">{article.title}</h3>
+              <p className="text-slate-500 line-clamp-3">{article.content}</p>
+            </article>
+          ))}
+        </div>
       </main>
 
-      <Footer settings={settings || defaultSettings} />
+      <Footer settings={settings} />
 
-      {isAdminOpen && (
-        <Login 
-          onClose={() => setIsAdminOpen(false)}
-          onLogin={(isAdmin) => {
-            if (isAdmin) setIsAdminLoggedIn(true);
-            setIsAdminOpen(false);
-          }}
-        />
-      )}
-
-      {selectedArticle && (
-        <ArticleModal 
-          article={selectedArticle} 
-          onClose={() => setSelectedArticle(null)} 
-          onLike={() => console.log('Liked story')} 
-        />
-      )}
-      
-      {/* Floating Admin Button */}
       {!isAdminLoggedIn && (
-        <button 
-          onClick={() => setIsAdminOpen(true)}
-          className="fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl hover:scale-105 transition-all font-bold z-50 text-sm"
-        >
-          🔐 Admin Access
+        <button onClick={() => setIsAdminOpen(true)} className="fixed bottom-8 right-8 bg-slate-900 text-white p-4 rounded-full shadow-2xl z-50">
+          🔐 Admin
         </button>
       )}
+
+      {isAdminOpen && <Login onClose={() => setIsAdminOpen(false)} onLogin={(admin) => admin && setIsAdminLoggedIn(true)} />}
+      {selectedArticle && <ArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
     </div>
   );
 }
