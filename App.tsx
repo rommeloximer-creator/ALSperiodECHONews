@@ -7,8 +7,7 @@ import AdminDashboard from './components/AdminDashboard';
 import ArticleModal from './components/ArticleModal';
 import { Article, Category } from './types';
 import { db } from './services/firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-
+import { collection, getDocs, query, orderBy, doc, getDoc } from 'firebase/firestore';
 const defaultSettings = {
   title: "ALS PeriodECHO",
   subtitle: "Official Newsletter",
@@ -30,7 +29,7 @@ function App() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [activeCategory, setActiveCategory] = useState<Category | 'HEADLINE'>('HEADLINE');
 
-  useEffect(() => {
+useEffect(() => {
     const fetchArticles = async () => {
       try {
         const q = query(collection(db, "articles"), orderBy("createdAt", "desc"));
@@ -41,7 +40,18 @@ function App() {
         console.error("Error:", error);
       }
     };
+
+    // --- ADDED SETTINGS FETCH ---
+    const fetchSettings = async () => {
+      const docRef = doc(db, 'settings', 'site_config');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setSettings(docSnap.data());
+      }
+    };
+
     fetchArticles();
+    fetchSettings(); // This triggers the settings load
   }, []);
 
   const filteredArticles = articles.filter(article => {
