@@ -237,12 +237,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       </main>
 
       {isEditorOpen && (
-        <ArticleEditor 
-          onClose={() => setIsEditorOpen(false)} 
-          onSave={handleSaveArticle}
-          initialData={editingArticle}
-        />
-      )}
+        {isEditorOpen && (
+  <ArticleEditor 
+    oncancel={() => setIsEditorOpen(false)}
+    onSave={handleSaveArticle}
+    article={editingArticle}
+  />
+)}
     </div>
   );
 };
