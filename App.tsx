@@ -129,15 +129,18 @@ function App() {
       )}
 
       {/* ARTICLE MODAL - Corrected ID argument type */}
+      {/* --- ONLY PASTE FROM HERE DOWN --- */}
       {selectedArticle && (
         <ArticleModal 
           article={selectedArticle} 
           onClose={() => setSelectedArticle(null)} 
-          onLike={(id: string) => console.log('Liked:', id)}
+          onLike={(id: string) => console.log('Liked story:', id)}
         />
       )}
     </div>
   );
 }
+
+export default App;
 
 export default App;
