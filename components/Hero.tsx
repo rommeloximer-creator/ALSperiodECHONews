@@ -8,8 +8,7 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ featuredArticle, onReadClick, settings }) => {
-  // Use the image from Firebase settings, or a high-quality fallback if empty
-  const heroBg = settings?.heroImageUrl || "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80";
+  const heroBg = settings?.heroImageUrl || "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f";
 
   return (
     <section className="relative h-[60vh] min-h-[500px] w-full flex items-center overflow-hidden bg-slate-900">
@@ -18,6 +17,7 @@ const Hero: React.FC<HeroProps> = ({ featuredArticle, onReadClick, settings }) =
           src={heroBg}
           alt="Hero Background"
           className="w-full h-full object-cover opacity-60"
+          onError={(e) => console.error("Hero Image Failed. Check URL in Firebase:", heroBg)}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
       </div>
