@@ -130,13 +130,13 @@ function App() {
 
       {/* ARTICLE MODAL - Corrected ID argument type */}
       {selectedArticle && (
-        {selectedArticle && (
- <ArticleModal 
-  article={selectedArticle} 
-  onClose={() => setSelectedArticle(null)} 
-  onLike={(id: string) => console.log("Liked story ID:", id)} 
-/>
-)}
+       {selectedArticle && (
+        <ArticleModal 
+          article={selectedArticle} 
+          onClose={() => setSelectedArticle(null)} 
+          onLike={(id: string) => console.log('Liked:', id)}
+        />
+      )}
     </div>
   );
 }
