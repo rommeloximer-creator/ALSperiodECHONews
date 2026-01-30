@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import ArticleEditor from './ArticleEditor';
 import { Article } from '../types';
+import { db } from '../services/firebase'; // Ensure this path correctly points to your firebase config
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -11,15 +13,27 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
 
   const handleSaveArticle = async (data: any) => {
-    console.log("Saving article data:", data);
-    // Add your firebase save logic here
-    setIsEditorOpen(false);
-    setEditingArticle(null);
-  };
+    try {
+      console.log("Attempting to save to Firebase...", data);
+      
+      // This sends the data to your Firestore 'articles' collection
+      await addDoc(collection(db, "articles"), {
+        ...data,
+        createdAt: serverTimestamp(), // Automatically adds the post date
+        views: 0,
+        likes: 0
+      });
 
-  const handleEdit = (article: Article) => {
-    setEditingArticle(article);
-    setIsEditorOpen(true);
+      alert("Success! Your article is now live.");
+      setIsEditorOpen(false);
+      setEditingArticle(null);
+      
+      // Refresh to pull the new data from Firebase onto the homepage
+      window.location.reload(); 
+    } catch (error) {
+      console.error("Firebase Save Error:", error);
+      alert("Error: Could not save to database. Check your Firebase Rules!");
+    }
   };
 
   return (
@@ -39,19 +53,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
         {isEditorOpen ? (
           <div className="max-w-4xl mx-auto">
-            {/* FIXED BELOW: 
-                1. changed initialData to article
-                2. changed onClose to oncancel (lowercase)
-               
-            */}
             <ArticleEditor 
-  article={editingArticle} 
-  onSave={handleSaveArticle}
-  oncancel={() => {
-    setIsEditorOpen(false);
-    setEditingArticle(null);
-  }}
-/>
+              article={editingArticle} 
+              onSave={handleSaveArticle}
+              oncancel={() => {
+                setIsEditorOpen(false);
+                setEditingArticle(null);
+              }}
+            />
           </div>
         ) : (
           <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-16 text-center">
@@ -60,7 +69,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             </div>
             <h2 className="text-2xl font-bold text-slate-800 mb-2">Newsroom Manager</h2>
             <p className="text-slate-500 mb-10 max-w-sm mx-auto">
-              Welcome back! Use this portal to publish new stories or updates for the ALS community.
+              Ready to update the ALS community? Create a new headline or edit existing stories here.
             </p>
             <button 
               onClick={() => setIsEditorOpen(true)}
