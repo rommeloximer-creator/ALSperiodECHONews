@@ -130,7 +130,7 @@ function App() {
         <ArticleModal 
           article={selectedArticle} 
           onClose={() => setSelectedArticle(null)} 
-          onLike={(id: string) => console.log('Liked:', id)}
+          onLike={() => console.log('Liked story')} // Removed the (id) argument here
         />
       )}
     </div>
