@@ -127,11 +127,11 @@ function App() {
       )}
 
       {selectedArticle && (
-        <ArticleModal 
-          article={selectedArticle} 
-          onClose={() => setSelectedArticle(null)} 
-          onLike={(id) => console.log('Liked:', id)}
-        />
+       <ArticleModal 
+  article={selectedArticle} 
+  onClose={() => setSelectedArticle(null)} 
+  onLike={(id: any) => console.log("Liked:", id)} // Ensure (id: any) is here
+/>
       )}
     </div>
   );
