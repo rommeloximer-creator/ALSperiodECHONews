@@ -45,13 +45,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                
             */}
             <ArticleEditor 
-              article={editingArticle} 
-              onSave={handleSaveArticle}
-              oncancel={() => {
-                setIsEditorOpen(false);
-                setEditingArticle(null);
-              }}
-            />
+  article={editingArticle} 
+  onSave={handleSaveArticle}
+  oncancel={() => {
+    setIsEditorOpen(false);
+    setEditingArticle(null);
+  }}
+/>
           </div>
         ) : (
           <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-16 text-center">
