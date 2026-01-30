@@ -5,17 +5,17 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ settings }) => {
-  // Check if we should show a banner image or just text
   const isBannerMode = settings?.brandingType === 'banner' && settings?.bannerUrl;
 
   return (
     <header className="w-full bg-white border-b border-slate-100">
       {isBannerMode ? (
-        <div className="w-full h-auto">
+        <div className="w-full">
           <img 
             src={settings.bannerUrl} 
-            alt={settings.title || "Banner"} 
-            className="w-full h-full object-cover"
+            alt="Site Banner" 
+            className="w-full h-auto block"
+            onError={(e) => console.error("Header Image Failed to Load. URL:", settings.bannerUrl)}
           />
         </div>
       ) : (
