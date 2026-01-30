@@ -77,6 +77,7 @@ useEffect(() => {
       <main>
         {activeCategory === 'HEADLINE' && (
         <>
+          <>
           <Hero 
             settings={settings} 
             featuredArticle={articles[0] || null} 
