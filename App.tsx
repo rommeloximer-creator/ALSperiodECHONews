@@ -38,7 +38,7 @@ function App() {
         const fetched = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Article));
         setArticles(fetched);
       } catch (error) {
-        console.error("Error fetching articles:", error);
+        console.error("Error:", error);
       }
     };
     fetchArticles();
@@ -51,7 +51,6 @@ function App() {
     return articleCat === activeCat;
   });
 
-  // Check if Admin is logged in to return the Dashboard
   if (isAdminLoggedIn) {
     return <AdminDashboard onLogout={() => setIsAdminLoggedIn(false)} />;
   }
@@ -69,7 +68,6 @@ function App() {
       />
       
       <main>
-        {/* HERO SECTION - Fixed onReadClick type */}
         {activeCategory === 'HEADLINE' && (
           <Hero 
             settings={defaultSettings} 
@@ -128,19 +126,15 @@ function App() {
         />
       )}
 
-      {/* ARTICLE MODAL - Corrected ID argument type */}
-      {/* --- ONLY PASTE FROM HERE DOWN --- */}
       {selectedArticle && (
         <ArticleModal 
           article={selectedArticle} 
           onClose={() => setSelectedArticle(null)} 
-          onLike={(id: string) => console.log('Liked story:', id)}
+          onLike={(id: string) => console.log('Liked:', id)}
         />
       )}
     </div>
   );
 }
-
-export default App;
 
 export default App;
