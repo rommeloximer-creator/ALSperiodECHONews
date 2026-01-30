@@ -1,130 +1,153 @@
-import React, { useState, useEffect } from 'react';
-import { Article } from '../types';
+import React, { useState } from 'react';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../services/firebase';
+import { Article, Category } from '../types';
 
 interface ArticleEditorProps {
-  article?: Partial<Article> | null;
-  onSave: (articleData: Omit<Article, 'id' | 'createdAt'>) => Promise<void>;
-  oncancel: () => void; // Fixed: Changed 'onCancel' to 'oncancel' to match your build logs
+  article: Article | null;
+  onSave: (data: Partial<Article>) => void;
+  oncancel: () => void;
 }
 
+const categories: (Category | 'HEADLINE')[] = [
+  'HEADLINE',
+  'NEWS',
+  'LIFESTYLE/FEATURE',
+  'EDITORIAL',
+  'SPORTS AND HEALTH',
+  'SCIENCE AND TECHNOLOGY',
+  'ENTERTAINMENT',
+  'LIVELIHOOD',
+  'SUCCESS STORIES',
+  'LITERARY'
+];
+
 const ArticleEditor: React.FC<ArticleEditorProps> = ({ article, onSave, oncancel }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    category: '',
-    content: '',
-    excerpt: '', // Added: Now supported by your updated types.ts
-    author: '',
-    image: '',
-    images: [] as string[],
-    isFeatured: false
-  });
-
-  useEffect(() => {
-    if (article) {
-      setFormData({
-        title: article.title || '',
-        category: article.category || '',
-        content: article.content || '',
-        excerpt: article.excerpt || '', // Added
-        author: article.author || '',
-        image: article.image || '',
-        images: article.images || [],
-        isFeatured: article.isFeatured || false
-      });
+  const [uploading, setUploading] = useState(false);
+  const [formData, setFormData] = useState<Partial<Article>>(
+    article || {
+      title: '',
+      content: '',
+      category: 'NEWS',
+      image: '',
+      author: 'ALS PeriodECHO Staff',
     }
-  }, [article]);
+  );
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      // Create a unique storage reference in the 'articles' folder
+      const storageRef = ref(storage, `articles/${Date.now()}_${file.name}`);
+      
+      // Upload the file to Firebase Storage
+      await uploadBytes(storageRef, file);
+      
+      // Get the public download URL
+      const url = await getDownloadURL(storageRef);
+      
+      setFormData({ ...formData, image: url });
+      alert("Image uploaded successfully!");
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Failed to upload image. Make sure Firebase Storage rules are set to public!");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    await onSave(formData);
+    if (!formData.title || !formData.content) {
+      alert("Please fill in the title and content.");
+      return;
+    }
+    onSave(formData);
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
-      <h2 className="text-2xl font-bold mb-6 text-slate-800">
-        {article ? 'Edit Article' : 'Create New Article'}
+    <div className="bg-white rounded-3xl shadow-2xl p-8 border border-slate-100">
+      <h2 className="text-2xl font-black text-slate-900 mb-6 uppercase tracking-tight">
+        {article ? 'Edit Article' : 'Compose New Story'}
       </h2>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Title</label>
+          <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider">Title</label>
           <input
             type="text"
-            className="w-full p-2 border rounded-md"
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#154897] outline-none"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            required
+            placeholder="Enter a catchy headline..."
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Category</label>
-            <input
-              type="text"
-              className="w-full p-2 border rounded-md"
+            <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider">Category</label>
+            <select
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#154897] outline-none"
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              required
-            />
+              onChange={(e) => setFormData({ ...formData, category: e.target.value as Category })}
+            >
+              {categories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
           </div>
+
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Author</label>
+            <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider">
+              Feature Image {uploading && <span className="text-blue-600 animate-pulse">(Uploading...)</span>}
+            </label>
             <input
-              type="text"
-              className="w-full p-2 border rounded-md"
-              value={formData.author}
-              onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-              required
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-[#154897] hover:file:bg-blue-100 transition-all"
             />
           </div>
         </div>
 
-        {/* Excerpt Field */}
-        <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Short Excerpt (Summary)</label>
-          <textarea
-            className="w-full p-2 border rounded-md h-20"
-            value={formData.excerpt}
-            onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-          />
-        </div>
+        {formData.image && (
+          <div className="relative w-full h-48 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200">
+            <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+            <div className="absolute top-2 left-2 bg-white/90 px-3 py-1 rounded-full text-[10px] font-bold text-slate-800 uppercase shadow-sm">
+              Image Preview
+            </div>
+          </div>
+        )}
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Full Content</label>
+          <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider">Article Content</label>
           <textarea
-            className="w-full p-2 border rounded-md h-40"
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#154897] outline-none h-64 resize-none"
             value={formData.content}
             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-            required
+            placeholder="Write your story here..."
           />
         </div>
 
-        <div className="flex items-center space-x-2 pb-4">
-          <input
-            type="checkbox"
-            id="featured"
-            checked={formData.isFeatured}
-            onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-          />
-          <label htmlFor="featured" className="text-sm font-bold text-slate-700">
-            Feature this story on Homepage
-          </label>
-        </div>
-
-        <div className="flex justify-end space-x-3 pt-4 border-t">
-          <button
-            type="button"
-            onClick={oncancel} // Fixed: lowercase 'oncancel'
-            className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-md transition-colors"
-          >
-            Cancel
-          </button>
+        <div className="flex gap-4 pt-4">
           <button
             type="submit"
-            className="px-6 py-2 bg-[#154897] text-white font-bold rounded-md hover:bg-blue-800 transition-colors"
+            disabled={uploading}
+            className={`flex-1 py-4 rounded-full font-black text-sm uppercase tracking-widest transition-all shadow-lg ${
+              uploading ? 'bg-slate-300 cursor-not-allowed' : 'bg-[#154897] text-white hover:bg-[#cc2127] hover:-translate-y-1'
+            }`}
           >
-            Save Article
+            {uploading ? 'Processing Image...' : 'Publish to Newsroom'}
+          </button>
+          <button
+            type="button"
+            onClick={oncancel}
+            className="px-8 py-4 bg-white text-slate-500 font-bold rounded-full border border-slate-200 hover:bg-slate-50 transition-all uppercase tracking-widest text-sm"
+          >
+            Cancel
           </button>
         </div>
       </form>
