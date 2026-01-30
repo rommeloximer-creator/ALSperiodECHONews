@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../services/firebase';
 import { Article, Category } from '../types';
 
 interface ArticleEditorProps {
@@ -9,51 +7,49 @@ interface ArticleEditorProps {
   oncancel: () => void;
 }
 
-const categories: (Category | 'HEADLINE')[] = [
-  'HEADLINE',
-  'NEWS',
-  'LIFESTYLE/FEATURE',
-  'EDITORIAL',
-  'SPORTS AND HEALTH',
-  'SCIENCE AND TECHNOLOGY',
-  'ENTERTAINMENT',
-  'LIVELIHOOD',
-  'SUCCESS STORIES',
-  'LITERARY'
-];
-
 const ArticleEditor: React.FC<ArticleEditorProps> = ({ article, onSave, oncancel }) => {
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState<Partial<Article>>(
     article || {
       title: '',
       content: '',
-      category: 'NEWS',
+      category: Category.NEWS, // Fixed: Using Enum instead of raw string
       image: '',
       author: 'ALS PeriodECHO Staff',
     }
   );
 
+  // Using ImgBB to bypass Firebase Storage "Upgrade" requirements
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY;
+    if (!IMGBB_API_KEY) {
+      alert("Missing ImgBB API Key in Vercel settings!");
+      return;
+    }
+
+    const uploadData = new FormData();
+    uploadData.append('image', file);
+    
     setUploading(true);
     try {
-      // Create a unique storage reference in the 'articles' folder
-      const storageRef = ref(storage, `articles/${Date.now()}_${file.name}`);
+      const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+        method: 'POST',
+        body: uploadData
+      });
+      const data = await response.json();
       
-      // Upload the file to Firebase Storage
-      await uploadBytes(storageRef, file);
-      
-      // Get the public download URL
-      const url = await getDownloadURL(storageRef);
-      
-      setFormData({ ...formData, image: url });
-      alert("Image uploaded successfully!");
+      if (data.success) {
+        setFormData(prev => ({ ...prev, image: data.data.url }));
+        alert("Image uploaded to ImgBB successfully!");
+      } else {
+        throw new Error("Upload failed");
+      }
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Failed to upload image. Make sure Firebase Storage rules are set to public!");
+      alert("Failed to upload image. Check your ImgBB API key.");
     } finally {
       setUploading(false);
     }
@@ -94,7 +90,7 @@ const ArticleEditor: React.FC<ArticleEditorProps> = ({ article, onSave, oncancel
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value as Category })}
             >
-              {categories.map(cat => (
+              {Object.values(Category).map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
