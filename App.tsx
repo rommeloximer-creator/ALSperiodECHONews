@@ -7,7 +7,7 @@ import AdminDashboard from './components/AdminDashboard';
 import ArticleModal from './components/ArticleModal';
 import { Article, Category } from './types';
 import { db } from './services/firebase';
-import { collection, getDocs, query, orderBy, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 const defaultSettings = {
   title: "ALS PeriodECHO",
@@ -106,6 +106,7 @@ function App() {
       {isAdminOpen && <Login onClose={() => setIsAdminOpen(false)} onLogin={(admin) => admin && setIsAdminLoggedIn(true)} />}
       {selectedArticle && (
         {selectedArticle && (
+       {selectedArticle && (
         <ArticleModal 
           article={selectedArticle} 
           onClose={() => setSelectedArticle(null)} 
@@ -115,7 +116,7 @@ function App() {
               await updateDoc(articleRef, {
                 likes: (selectedArticle.likes || 0) + 1
               });
-              // Update local state for instant visual feedback
+              // Local state update for instant visual feedback
               setArticles(articles.map(a => 
                 a.id === selectedArticle.id ? { ...a, likes: (a.likes || 0) + 1 } : a
               ));
