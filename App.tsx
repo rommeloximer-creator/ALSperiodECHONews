@@ -67,15 +67,12 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
-      <Header /> 
-        settings={defaultSettings}
-        auth={{ isAdmin: true, isLoggedIn: isAdminLoggedIn }}
-        onAdminClick={() => setIsAdminOpen(true)}
-        onLoginClick={() => setIsAdminOpen(true)}
-        onLogoutClick={() => setIsAdminLoggedIn(false)}
-        isAdminActive={false}
-        onCategorySelect={(cat) => setActiveCategory(cat)} 
-      <Header settings={settings} />
+      <Hero 
+          settings={settings}
+          articles={articles}
+          onArticleClick={(article: Article) => setSelectedArticle(article)}
+        />
+        <Header settings={settings} />
       
       <main>
         {activeCategory === 'HEADLINE' && (
