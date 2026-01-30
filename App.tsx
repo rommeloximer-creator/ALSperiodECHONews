@@ -76,13 +76,11 @@ useEffect(() => {
       
       <main>
         {activeCategory === 'HEADLINE' && (
-          <Hero 
-            settings={defaultSettings} 
-            featuredArticle={articles[0] || null} 
-            onReadClick={(id: string) => {
-              const article = articles.find(a => a.id === id);
-              if (article) setSelectedArticle(article);
-            }} 
+         <Hero 
+  settings={settings} 
+  featuredArticle={articles[0]} // This sends the latest article to the Hero
+  onReadClick={(id) => handleArticleClick(articles.find(a => a.id === id)!)}
+/>
           />
         )}
         
