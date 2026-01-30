@@ -28,7 +28,7 @@ function App() {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [activeCategory, setActiveCategory] = useState<Category | 'HEADLINE'>('HEADLINE');
-
+  const [settings, setSettings] = useState<any>(null);
 useEffect(() => {
     const fetchArticles = async () => {
       try {
