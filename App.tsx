@@ -104,9 +104,11 @@ function App() {
       )}
 
       {isAdminOpen && <Login onClose={() => setIsAdminOpen(false)} onLogin={(admin) => admin && setIsAdminLoggedIn(true)} />}
-      {selectedArticle && <ArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
-    </div>
-  );
-}
-
+      {selectedArticle && (
+        <ArticleModal 
+          article={selectedArticle} 
+          onClose={() => setSelectedArticle(null)} 
+          onLike={() => console.log('Article liked')} // Add this line to fix the error
+        />
+      )}
 export default App;
