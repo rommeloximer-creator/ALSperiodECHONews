@@ -76,12 +76,15 @@ useEffect(() => {
       
       <main>
         {activeCategory === 'HEADLINE' && (
-         <Hero 
-  settings={settings} 
-  featuredArticle={articles[0]} // This sends the latest article to the Hero
-  onReadClick={(id) => handleArticleClick(articles.find(a => a.id === id)!)}
-/>
-          />
+        <Hero 
+          settings={settings} 
+          featuredArticle={articles[0] || null} 
+          onReadClick={(id) => {
+            const article = articles.find(a => a.id === id);
+            if (article) handleArticleClick(article);
+          }}
+        />
+        <Header settings={settings} />
         )}
         
         <section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
