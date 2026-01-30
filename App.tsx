@@ -75,7 +75,7 @@ useEffect(() => {
         onLogoutClick={() => setIsAdminLoggedIn(false)}
         isAdminActive={false}
         onCategorySelect={(cat) => setActiveCategory(cat)} 
-      />
+      <Header settings={settings} />
       
       <main>
         {activeCategory === 'HEADLINE' && (
