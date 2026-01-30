@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ArticleEditor from './ArticleEditor';
 import { Article } from '../types';
-import { db } from '../services/firebase'; // Ensure this path correctly points to your firebase config
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../services/firebase';
+import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -11,34 +11,65 @@ interface AdminDashboardProps {
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  
+  // State for Site Branding
+  const [siteSettings, setSiteSettings] = useState({
+    bannerUrl: '',
+    heroUrl: '',
+    brandingType: 'Standard'
+  });
+
+  // Load current settings when dashboard opens
+  useEffect(() => {
+    const fetchCurrentSettings = async () => {
+      const docRef = doc(db, 'settings', 'site_config');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setSiteSettings({
+          bannerUrl: data.bannerUrl || '',
+          heroUrl: data.heroUrl || '',
+          brandingType: data.brandingType || 'Standard'
+        });
+      }
+    };
+    fetchCurrentSettings();
+  }, []);
+
+  // Save branding changes to Firebase
+  const handleSaveSettings = async () => {
+    try {
+      const docRef = doc(db, 'settings', 'site_config');
+      await updateDoc(docRef, siteSettings);
+      alert("Success! Site branding has been updated.");
+    } catch (error) {
+      console.error("Error updating settings:", error);
+      alert("Failed to update settings. check your Firebase permissions.");
+    }
+  };
 
   const handleSaveArticle = async (data: any) => {
     try {
-      console.log("Attempting to save to Firebase...", data);
-      
-      // This sends the data to your Firestore 'articles' collection
       await addDoc(collection(db, "articles"), {
         ...data,
-        createdAt: serverTimestamp(), // Automatically adds the post date
+        createdAt: serverTimestamp(),
         views: 0,
         likes: 0
       });
-
       alert("Success! Your article is now live.");
       setIsEditorOpen(false);
       setEditingArticle(null);
-      
-      // Refresh to pull the new data from Firebase onto the homepage
       window.location.reload(); 
     } catch (error) {
       console.error("Firebase Save Error:", error);
-      alert("Error: Could not save to database. Check your Firebase Rules!");
+      alert("Error: Could not save article.");
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 p-8">
       <div className="max-w-6xl mx-auto">
+        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-black text-slate-900 tracking-tighter">
             ALS PeriodECHO <span className="text-[#cc2127]">ADMIN</span>
@@ -51,6 +82,55 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           </button>
         </div>
 
+        {/* --- SITE BRANDING MANAGER --- */}
+        {!isEditorOpen && (
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 mb-8">
+            <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+              <span>🎨</span> Site Branding & Appearance
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Branding Style</label>
+                <select 
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700"
+                  value={siteSettings.brandingType}
+                  onChange={(e) => setSiteSettings({...siteSettings, brandingType: e.target.value})}
+                >
+                  <option value="Standard">Standard (Text Title)</option>
+                  <option value="banner">Custom Banner Image</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Banner Image URL</label>
+                <input 
+                  type="text" 
+                  placeholder="Paste ImgBB link here..."
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl"
+                  value={siteSettings.bannerUrl}
+                  onChange={(e) => setSiteSettings({...siteSettings, bannerUrl: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Welcome (Hero) Image URL</label>
+                <input 
+                  type="text" 
+                  placeholder="Paste ImgBB link here..."
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl"
+                  value={siteSettings.heroUrl}
+                  onChange={(e) => setSiteSettings({...siteSettings, heroUrl: e.target.value})}
+                />
+              </div>
+            </div>
+            <button 
+              onClick={handleSaveSettings}
+              className="mt-6 px-8 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-blue-600 transition-all shadow-md"
+            >
+              Apply Branding Changes
+            </button>
+          </div>
+        )}
+
+        {/* --- ARTICLE MANAGER --- */}
         {isEditorOpen ? (
           <div className="max-w-4xl mx-auto">
             <ArticleEditor 
