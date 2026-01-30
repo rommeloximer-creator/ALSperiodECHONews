@@ -105,10 +105,24 @@ function App() {
 
       {isAdminOpen && <Login onClose={() => setIsAdminOpen(false)} onLogin={(admin) => admin && setIsAdminLoggedIn(true)} />}
       {selectedArticle && (
+        {selectedArticle && (
         <ArticleModal 
           article={selectedArticle} 
           onClose={() => setSelectedArticle(null)} 
-          onLike={() => console.log('Article liked')} // Add this line to fix the error
+          onLike={async () => {
+            try {
+              const articleRef = doc(db, 'articles', selectedArticle.id);
+              await updateDoc(articleRef, {
+                likes: (selectedArticle.likes || 0) + 1
+              });
+              // Update local state for instant visual feedback
+              setArticles(articles.map(a => 
+                a.id === selectedArticle.id ? { ...a, likes: (a.likes || 0) + 1 } : a
+              ));
+            } catch (err) {
+              console.error("Error liking article:", err);
+            }
+          }}
         />
       )}
 export default App;
