@@ -57,7 +57,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
-      <Header 
+      <Header /> 
         settings={defaultSettings}
         auth={{ isAdmin: true, isLoggedIn: isAdminLoggedIn }}
         onAdminClick={() => setIsAdminOpen(true)}
