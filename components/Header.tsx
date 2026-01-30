@@ -1,40 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../services/firebase';
+import React from 'react';
 
-const Header: React.FC = () => {
-  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+// This "Interface" tells the computer that Header is allowed to receive settings
+interface HeaderProps {
+  settings?: {
+    bannerUrl?: string;
+    brandingType?: string;
+  };
+}
 
-  useEffect(() => {
-    const fetchBranding = async () => {
-      try {
-        const docRef = doc(db, 'settings', 'site_config');
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          // Only show the banner if brandingType is set to 'banner'
-          if (data.brandingType === 'banner' || data.brandingType === 'Standard') {
-            setBannerUrl(data.bannerUrl);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching branding:", error);
-      }
-    };
-
-    fetchBranding();
-  }, []);
+const Header: React.FC<HeaderProps> = ({ settings }) => {
+  // If we have a banner URL, we show the image. Otherwise, we show the text.
+  const showBanner = settings?.brandingType === 'banner' && settings?.bannerUrl;
 
   return (
     <header className="bg-white border-b border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center py-8">
-          {bannerUrl ? (
-            /* If there is a banner, show it */
-            <img src={bannerUrl} alt="ALS PeriodECHO Banner" className="w-full h-auto max-h-64 object-contain rounded-lg" />
+          {showBanner ? (
+            <img 
+              src={settings.bannerUrl} 
+              alt="ALS PeriodECHO Banner" 
+              className="w-full h-auto max-h-64 object-contain rounded-lg" 
+            />
           ) : (
-            /* Otherwise, show your original text branding */
             <>
               <h1 className="text-6xl font-black text-slate-900 tracking-tighter uppercase mb-2">
                 ALS PeriodECHO
