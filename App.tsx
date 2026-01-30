@@ -39,15 +39,23 @@ function App() {
         const fetched = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Article));
         setArticles(fetched);
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error fetching articles:", error);
       }
     };
 
     const fetchSettings = async () => {
-      const docRef = doc(db, 'settings', 'site_config');
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setSettings(docSnap.data());
+      try {
+        const docRef = doc(db, 'settings', 'site_config');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setSettings(docSnap.data());
+        } else {
+          // If no Firebase settings found, use defaults so site doesn't stay blank
+          setSettings(defaultSettings);
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+        setSettings(defaultSettings);
       }
     };
 
@@ -62,14 +70,26 @@ function App() {
     return articleCat === activeCat;
   });
 
+  // --- SAFETY CHECK: Prevent Blank Screen while loading ---
+  if (!settings) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <div className="text-2xl font-black text-slate-900 animate-pulse mb-2">ALS PeriodECHO</div>
+          <p className="text-slate-400 font-medium">Loading site settings...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (isAdminLoggedIn) {
     return <AdminDashboard onLogout={() => setIsAdminLoggedIn(false)} />;
   }
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
-      {/* Header and Hero now sit at the top, receiving data from your Firebase settings */}
       <Header settings={settings} />
+      
       <Hero 
         settings={settings} 
         featuredArticle={articles[0] || null} 
@@ -81,7 +101,7 @@ function App() {
       
       <main>
         <section id="news-feed" className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-          <div className="border-b-4 border-slate-900 pb-4 mb-12">
+          <div className="border-b-4 border-slate-900 pb-4 mb-12 flex justify-between items-end">
             <h2 className="text-4xl font-serif font-black uppercase">
               {activeCategory === 'HEADLINE' ? 'Community Voice' : activeCategory}
             </h2>
@@ -115,7 +135,7 @@ function App() {
         </section>
       </main>
 
-      <Footer settings={defaultSettings} />
+      <Footer settings={settings || defaultSettings} />
 
       {isAdminOpen && (
         <Login 
@@ -135,13 +155,13 @@ function App() {
         />
       )}
       
-      {/* Floating Admin Access Button */}
+      {/* Floating Admin Button */}
       {!isAdminLoggedIn && (
         <button 
           onClick={() => setIsAdminOpen(true)}
-          className="fixed bottom-8 right-8 bg-slate-900 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform"
+          className="fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl hover:scale-105 transition-all font-bold z-50 text-sm"
         >
-          Admin
+          🔐 Admin Access
         </button>
       )}
     </div>
