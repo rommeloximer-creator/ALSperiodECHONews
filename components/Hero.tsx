@@ -2,9 +2,9 @@ import React from 'react';
 import { SiteSettings, Article } from '../types';
 
 interface HeroProps {
-  settings: SiteSettings;
-  featuredArticle: Article | null;
-  onReadClick: (id: string) => void; // This matches the ID expected in App.tsx
+  articles: Article[];
+  onArticleClick: (article: Article) => void;
+  settings?: any; // This line "unlocks" the door for settings
 }
 
 const Hero: React.FC<HeroProps> = ({ settings, featuredArticle, onReadClick }) => {
